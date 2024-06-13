@@ -2385,19 +2385,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Lucio\\.nuget\\packages\\": {}
+    "C:\\Users\\marce\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Lucio\\Desktop\\Programacion\\3er Cuatrimestre\\Programacion 3\\TPI\\TPI\\Infrastructure\\Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\marce\\TUP3\\Programacion3\\TPI-P3-Cepeda-Rabbia-Volpe\\TPI\\Infrastructure\\Infrastructure.csproj",
       "projectName": "Infrastructure",
-      "projectPath": "C:\\Users\\Lucio\\Desktop\\Programacion\\3er Cuatrimestre\\Programacion 3\\TPI\\TPI\\Infrastructure\\Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\Lucio\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Lucio\\Desktop\\Programacion\\3er Cuatrimestre\\Programacion 3\\TPI\\TPI\\Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\marce\\TUP3\\Programacion3\\TPI-P3-Cepeda-Rabbia-Volpe\\TPI\\Infrastructure\\Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\marce\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\marce\\TUP3\\Programacion3\\TPI-P3-Cepeda-Rabbia-Volpe\\TPI\\Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Lucio\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\marce\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2405,14 +2410,15 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\Lucio\\Desktop\\Programacion\\3er Cuatrimestre\\Programacion 3\\TPI\\TPI\\Application\\Application.csproj": {
-              "projectPath": "C:\\Users\\Lucio\\Desktop\\Programacion\\3er Cuatrimestre\\Programacion 3\\TPI\\TPI\\Application\\Application.csproj"
+            "C:\\Users\\marce\\TUP3\\Programacion3\\TPI-P3-Cepeda-Rabbia-Volpe\\TPI\\Application\\Application.csproj": {
+              "projectPath": "C:\\Users\\marce\\TUP3\\Programacion3\\TPI-P3-Cepeda-Rabbia-Volpe\\TPI\\Application\\Application.csproj"
             }
           }
         }
