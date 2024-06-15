@@ -11,8 +11,6 @@ namespace Domain.Entities
     public abstract class User
     {
 
-        //Testing 15/06/2024 asd
-        //Second test
         [Key]
         public Guid Id { get; set; }
 
