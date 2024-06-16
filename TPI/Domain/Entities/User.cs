@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,39 +11,36 @@ namespace Domain.Entities
 {
     public abstract class User
     {
-
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters.")]
-        [Column(TypeName = "nvarchar(100)")]
+        [StringLength(100, ErrorMessage = "Nombre no puede tener mas de 100 caracteres")]
+        [Column(TypeName = "NVARCHAR(100)")]
         public string Name { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "Last name cannot be longer than 100 characters.")]
-        [Column(TypeName = "nvarchar(100)")]
+        [StringLength(100, ErrorMessage = "Apellido no puede tener mas de 100 caracteres")]
+        [Column(TypeName = "NVARCHAR(100)")]
         public string LastName { get; set; }
 
         [Required]
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        [Column(TypeName = "nvarchar(100)")]
+        [EmailAddress(ErrorMessage = "Dirección de correo incorrecta")]
+        [Column(TypeName = "NVARCHAR(100)")]
         public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        [Column(TypeName = "nvarchar(100)")]
-        public string Password { get; set; }
-
-        [Required]
-        [Column(TypeName = "nvarchar(100)")]
-        public string UserName { get; set; }
-
-        [Column(TypeName = "nvarchar(20)")]
-        public string UserType { get; set; }
+        [Column(TypeName = "NVARCHAR(100)")]
+        public string Password { get; set; }  
 
         [Required]
         [DataType(DataType.Date)]
         public DateTime Birthdate { get; set; }
+
+        [Required]
+        public UserRole Role { get; set; }
+
+        public ICollection<Booking> Bookings { get; set; }
     }
 }
