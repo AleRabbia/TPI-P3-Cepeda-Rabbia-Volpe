@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    public class IBookingService
+    public interface IBookingService
     {
         Task<IEnumerable<Booking>> GetAllBookingsAsync();
         Task<Booking> GetBookingByIdAsync(int id);

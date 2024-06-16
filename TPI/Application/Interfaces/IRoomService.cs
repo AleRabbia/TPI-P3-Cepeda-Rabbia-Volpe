@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    public class IRoomService
+    public interface IRoomService
     {
         Task<IEnumerable<Room>> GetAllRoomsAsync();
         Task<Room> GetRoomByIdAsync(int id);
