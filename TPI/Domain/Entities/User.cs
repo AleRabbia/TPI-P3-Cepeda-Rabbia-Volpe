@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public abstract class User
+    public class User
     {
         [Key]
         public int Id { get; set; }
@@ -42,5 +42,6 @@ namespace Domain.Entities
         public UserRole Role { get; set; }
 
         public ICollection<Booking> Bookings { get; set; }
+        public User() { }
     }
 }

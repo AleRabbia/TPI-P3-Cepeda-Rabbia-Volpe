@@ -19,17 +19,17 @@ namespace Infrastructure
 
 
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<User>()
-        //        .HasMany(u => u.Bookings)
-        //        .WithOne(b => b.Customer)
-        //        .HasForeignKey(b => b.CustomerId);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+           modelBuilder.Entity<User>()
+               .HasMany(u => u.Bookings)
+               .WithOne(b => b.Customer)
+                .HasForeignKey(b => b.CustomerId);
 
-        //    modelBuilder.Entity<Room>()
-        //        .HasMany(r => r.Bookings)
-        //        .WithOne(b => b.Room)
-        //        .HasForeignKey(b => b.RoomId);
-        //}
+            modelBuilder.Entity<Room>()
+                .HasMany(r => r.Bookings)
+                .WithOne(b => b.Room)
+                .HasForeignKey(b => b.RoomId);
+        }
     }
 }

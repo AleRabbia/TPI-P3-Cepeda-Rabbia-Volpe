@@ -39,5 +39,6 @@ namespace Domain.Entities
         public int Occupation { get; set; }
 
         public ICollection<Booking> Bookings { get; set; }
+        public Room() { }
     }
 }
