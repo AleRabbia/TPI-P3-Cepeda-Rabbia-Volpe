@@ -1,22 +1,62 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.Interfaces;
+using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        [HttpGet ("{Id}")]
-        public ActionResult GetById([FromRoute]Guid id)
+        private readonly IUserService _userService;
+
+        public UserController(IUserService userService)
         {
-            return Ok();
+            _userService = userService;
         }
-        
+
         [HttpGet]
-        public ActionResult GetAll()
+        public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            return Ok();
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<User>> GetById(int id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Create(User user)
+        {
+            await _userService.AddUserAsync(user);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Update(int id, User user)
+        {
+            if (id != user.Id)
+            {
+                return BadRequest();
+            }
+            await _userService.UpdateUserAsync(user);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            await _userService.DeleteUserAsync(id);
+            return NoContent();
         }
     }
 }
