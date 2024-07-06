@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
+using Application.Models;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,11 +37,21 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(Room room)
+        public async Task<ActionResult> Create(CreateRoomDto roomDto)
         {
+            var room = new Room
+            {
+                Price = roomDto.Price,
+                Score = roomDto.Score,
+                Service = roomDto.Service,
+                Category = roomDto.Category, // Asignación directa, roomDto.Category es CategoryRoom
+                Occupation = roomDto.Occupation
+            };
+
             await _roomService.AddRoomAsync(room);
             return CreatedAtAction(nameof(GetById), new { id = room.Id }, room);
         }
+
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(int id, Room room)

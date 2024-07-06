@@ -1,4 +1,8 @@
+using Application.Interfaces;
+using Application.Services;
+using Domain.Interfaces;
 using Infrastructure;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +19,12 @@ builder.Services.AddSwaggerGen();
 // Corrige el nombre de la cadena de conexión aquí
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Registro de IRoomRepository y su implementación RoomRepository
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+
+// Registro de IRoomService y su implementación RoomService
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 var app = builder.Build();
 
