@@ -19,32 +19,60 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Room>>> GetAll()
+        public async Task<ActionResult<IEnumerable<RoomDto>>> GetAll()
         {
             var rooms = await _roomService.GetAllRoomsAsync();
-            return Ok(rooms);
+
+            var roomDtos = rooms.Select(room => new RoomDto
+            {
+                Id = room.Id,
+                Price = room.Price,
+                Score = room.Score,
+                Service = room.Service,
+                Category = room.Category.ToString(), // Convierte el enum a string
+                Occupation = room.Occupation
+            });
+
+            return Ok(roomDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Room>> GetById(int id)
+        public async Task<ActionResult<RoomDto>> GetById(int id)
         {
             var room = await _roomService.GetRoomByIdAsync(id);
             if (room == null)
             {
                 return NotFound();
             }
-            return Ok(room);
+
+            var roomDto = new RoomDto
+            {
+                Id = room.Id,
+                Price = room.Price,
+                Score = room.Score,
+                Service = room.Service,
+                Category = room.Category.ToString(), // Convierte el enum a string
+                Occupation = room.Occupation
+            };
+
+            return Ok(roomDto);
         }
+
 
         [HttpPost]
         public async Task<ActionResult> Create(CreateRoomDto roomDto)
         {
+            if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
+            {
+                return BadRequest("Invalid category value.");
+            }
+
             var room = new Room
             {
                 Price = roomDto.Price,
                 Score = roomDto.Score,
                 Service = roomDto.Service,
-                Category = roomDto.Category, // Asignación directa, roomDto.Category es CategoryRoom
+                Category = category,
                 Occupation = roomDto.Occupation
             };
 
@@ -54,15 +82,28 @@ namespace Presentation.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Room room)
+        public async Task<ActionResult> Update(int id, UpdateRoomDto roomDto)
         {
-            if (id != room.Id)
+            // Convierte la string de Category a enum CategoryRoom
+            if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
             {
-                return BadRequest();
+                return BadRequest("Invalid category value.");
             }
+
+            var room = new Room
+            {
+                Id = id, // Asegúrate de que el ID esté establecido correctamente
+                Price = roomDto.Price,
+                Score = roomDto.Score,
+                Service = roomDto.Service,
+                Category = category, // Asigna el valor del enum convertido
+                Occupation = roomDto.Occupation
+            };
+
             await _roomService.UpdateRoomAsync(room);
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)

@@ -15,14 +15,12 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        //[Column(TypeName = "float")] //Para SQL Server
-        [Column(TypeName = "REAL")]// Para SQLite
+        [Column(TypeName = "REAL")]
         public float Price { get; set; }
 
         [Required]
         [Range(0, 5, ErrorMessage = "Score must be between 0 and 5.")]
-        //[Column(TypeName = "float")] //Para SQL Server
-        [Column(TypeName = "REAL")] //Para SQLite
+        [Column(TypeName = "REAL")]
         public float Score { get; set; }
 
         [Required]
@@ -31,21 +29,14 @@ namespace Domain.Entities
         public string Service { get; set; }
 
         [Required]
-        [StringLength(50, ErrorMessage = "Máximo 50 caracteres")]
         [Column(TypeName = "NVARCHAR(50)")]
-        public string Category { get; set; }
+        public CategoryRoom Category { get; set; }
 
         [Required]
         public int Occupation { get; set; }
 
         public ICollection<Booking> Bookings { get; set; }
-        // Propiedad calculada para obtener la descripción de CategoryRoom
-        [NotMapped] // No se mapea a la base de datos
-        public CategoryRoom CategoryEnum
-        {
-            get => Enum.Parse<CategoryRoom>(Category);
-            set => Category = value.ToString();
-        }
+
         public Room() { }
     }
 }
