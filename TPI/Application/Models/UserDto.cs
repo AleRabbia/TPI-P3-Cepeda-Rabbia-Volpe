@@ -17,7 +17,7 @@ namespace Application.Models
 
         public static UserDto Create(User user)
         {
-            var dto = new UserDto
+            return new UserDto
             {
                 Id = user.Id,
                 Name = user.Name,
@@ -26,8 +26,7 @@ namespace Application.Models
                 Birthdate = user.Birthdate,
                 Role = user.Role.ToString()
             };
-
-            return dto;
         }
     }
+
 }
