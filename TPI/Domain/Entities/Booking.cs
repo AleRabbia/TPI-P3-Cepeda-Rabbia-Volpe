@@ -30,6 +30,7 @@ namespace Domain.Entities
 
         [Required]
         public DateTime CheckoutDate { get; set; }
+
         public Booking() { }
     }
 

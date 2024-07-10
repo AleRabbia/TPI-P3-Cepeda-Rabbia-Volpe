@@ -1,3 +1,4 @@
+using Application.Models;
 using Application.Interfaces;
 using Application.Services;
 using Domain.Interfaces;
@@ -18,12 +19,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Register services
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 // Configure Swagger
 builder.Services.AddSwaggerGen();

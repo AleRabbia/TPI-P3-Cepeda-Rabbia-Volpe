@@ -1,7 +1,9 @@
 ﻿using Application.Interfaces;
+using Application.Models;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Presentation.Controllers
 {
@@ -17,39 +19,72 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetAll()
+        public async Task<ActionResult<IEnumerable<BookingDTO>>> GetAll()
         {
             var bookings = await _bookingService.GetAllBookingsAsync();
-            return Ok(bookings);
+            var bookingDTOs = new List<BookingDTO>();
+            foreach (var booking in bookings)
+            {
+                bookingDTOs.Add(new BookingDTO
+                {
+                    Id = booking.Id,
+                    CustomerId = booking.CustomerId,
+                    RoomId = booking.RoomId,
+                    CheckinDate = booking.CheckinDate,
+                    CheckoutDate = booking.CheckoutDate
+                });
+            }
+            return Ok(bookingDTOs);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Booking>> GetById(int id)
+        public async Task<ActionResult<BookingDTO>> GetById(int id)
         {
             var booking = await _bookingService.GetBookingByIdAsync(id);
             if (booking == null)
             {
                 return NotFound();
             }
-            return Ok(booking);
+            var bookingDTO = new BookingDTO
+            {
+                Id = booking.Id,
+                CustomerId = booking.CustomerId,
+                RoomId = booking.RoomId,
+                CheckinDate = booking.CheckinDate,
+                CheckoutDate = booking.CheckoutDate
+            };
+            return Ok(bookingDTO);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(Booking booking)
+        public async Task<ActionResult<BookingDTO>> CreateBooking(BookingCreateDTO bookingCreateDTO)
         {
-            await _bookingService.AddBookingAsync(booking);
-            return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
+            var booking = await _bookingService.AddBookingAsync(bookingCreateDTO);
+
+            var bookingDTO = new BookingDTO
+            {
+                Id = booking.Id,
+                CustomerId = booking.CustomerId,
+                RoomId = booking.RoomId,
+                CheckinDate = booking.CheckinDate,
+                CheckoutDate = booking.CheckoutDate
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = bookingDTO.Id }, bookingDTO);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Booking booking)
+        public async Task<ActionResult> Update(int id, BookingUpdateDTO bookingUpdateDTO)
         {
-            if (id != booking.Id)
+            try
             {
-                return BadRequest();
+                await _bookingService.UpdateBookingAsync(id, bookingUpdateDTO);
+                return NoContent();
             }
-            await _bookingService.UpdateBookingAsync(booking);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]

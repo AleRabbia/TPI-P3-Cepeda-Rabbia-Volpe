@@ -64,7 +64,7 @@ namespace Presentation.Controllers
         {
             if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
             {
-                return BadRequest("Invalid category value.");
+                return BadRequest("Valor de categoria no es correcto.");
             }
 
             var room = new Room
@@ -87,7 +87,7 @@ namespace Presentation.Controllers
             // Convierte la string de Category a enum CategoryRoom
             if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
             {
-                return BadRequest("Invalid category value.");
+                return BadRequest("Valor de categoria no es correcto.");
             }
 
             var room = new Room

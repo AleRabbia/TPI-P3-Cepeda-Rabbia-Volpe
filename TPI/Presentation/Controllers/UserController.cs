@@ -43,7 +43,7 @@ namespace Presentation.Controllers
         {
             if (!Enum.TryParse(userDto.Role, out UserRole role))
             {
-                return BadRequest("Invalid role value.");
+                return BadRequest("Rol ingresado no es correcto.");
             }
 
             var user = new User
@@ -65,7 +65,7 @@ namespace Presentation.Controllers
         {
             if (!Enum.TryParse(userDto.Role, out UserRole role))
             {
-                return BadRequest("Invalid role value.");
+                return BadRequest("Rol ingresado no es correcto.");
             }
 
             var user = new User
