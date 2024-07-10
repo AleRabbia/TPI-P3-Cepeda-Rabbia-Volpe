@@ -17,9 +17,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 
-//builder.Services.AddScoped<IUserRepository, UserRepository>(); // Ensure this line is correct
 // Register services
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IUserService, UserService>();
