@@ -16,5 +16,6 @@ namespace Domain.Interfaces
         Task<User> GetByIdAsync(int id);
         Task UpdateAsync(User user);
         Task DeleteAsync(int id);
+        Task<User> GetUserByUserNameAsync(string userName);
     }
 }

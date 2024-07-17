@@ -14,7 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 
-namespace Infrastructure.Services
+namespace YourNamespace.Infrastructure.Services
 {
     public class AutenticacionService : ICustomAuthenticationService
     {
@@ -27,26 +27,25 @@ namespace Infrastructure.Services
             _options = options.Value;
         }
 
-        private User? ValidateUser(AuthenticationRequest authenticationRequest)
+        private async Task<User?> ValidateUserAsync(AuthenticationRequest authenticationRequest)
         {
             if (string.IsNullOrEmpty(authenticationRequest.UserName) || string.IsNullOrEmpty(authenticationRequest.Password))
                 return null;
 
-            //var user = _userRepository.GetUserByUserName(authenticationRequest.UserName);
+            var user = await _userRepository.GetUserByUserNameAsync(authenticationRequest.UserName);
 
-            //if (user == null) return null;
+            if (user == null) return null;
 
-            //if (authenticationRequest.UserType == typeof(Student).Name || authenticationRequest.UserType == typeof(Professor).Name)
-            //{
-            //    if (user.UserType == authenticationRequest.UserType && user.Password == authenticationRequest.Password) return user;
-            //}
+  
+            if (user.Role == authenticationRequest.UserType && user.Password == authenticationRequest.Password) return user;
+            
 
             return null;
         }
 
-        public string Autenticar(AuthenticationRequest authenticationRequest)
+        public async Task<string> AutenticarAsync(AuthenticationRequest authenticationRequest)
         {
-            var user = ValidateUser(authenticationRequest);
+            var user = await ValidateUserAsync(authenticationRequest);
 
             if (user == null)
             {
@@ -61,7 +60,7 @@ namespace Infrastructure.Services
                 new Claim("sub", user.Id.ToString()),
                 new Claim("given_name", user.Name),
                 new Claim("family_name", user.LastName),
-                new Claim("role", authenticationRequest.UserType)
+                new Claim("role", authenticationRequest.UserType.ToString())
             };
 
             var jwtSecurityToken = new JwtSecurityToken(
@@ -73,6 +72,11 @@ namespace Infrastructure.Services
                 credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        }
+
+        public string Autenticar(AuthenticationRequest authenticationRequest)
+        {
+            throw new NotImplementedException();
         }
 
         public class AutenticacionServiceOptions

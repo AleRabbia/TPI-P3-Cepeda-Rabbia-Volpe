@@ -49,5 +49,10 @@ namespace Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public Task<User> GetUserByUserNameAsync(string userName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
