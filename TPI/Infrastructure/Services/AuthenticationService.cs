@@ -14,7 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 
-namespace YourNamespace.Infrastructure.Services
+namespace Infrastructure.Services
 {
     public class AutenticacionService : ICustomAuthenticationService
     {
