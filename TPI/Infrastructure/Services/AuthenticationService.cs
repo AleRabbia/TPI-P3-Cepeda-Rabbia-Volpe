@@ -8,11 +8,11 @@ using Application.Models.Requests;
 using Domain.Interfaces;
 using Domain.Exceptions;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-
 
 namespace Infrastructure.Services
 {
@@ -34,13 +34,16 @@ namespace Infrastructure.Services
 
             var user = await _userRepository.GetUserByUserNameAsync(authenticationRequest.UserName);
 
-            if (user == null) return null;
+            if (user == null)
+                return null;
 
-  
-            if (user.Role == authenticationRequest.UserType && user.Password == authenticationRequest.Password) return user;
-            
+            if (!Enum.TryParse<UserRole>(authenticationRequest.UserType, true, out var userRole))
+                return null;
 
-            return null;
+            if (user.Role != userRole || user.Password != authenticationRequest.Password)
+                return null;
+
+            return user;
         }
 
         public async Task<string> AutenticarAsync(AuthenticationRequest authenticationRequest)
@@ -60,16 +63,15 @@ namespace Infrastructure.Services
                 new Claim("sub", user.Id.ToString()),
                 new Claim("given_name", user.Name),
                 new Claim("family_name", user.LastName),
-                new Claim("role", authenticationRequest.UserType.ToString())
+                new Claim("role", user.Role.ToString())
             };
 
             var jwtSecurityToken = new JwtSecurityToken(
                 _options.Issuer,
                 _options.Audience,
                 claimsForToken,
-                DateTime.UtcNow,
-                DateTime.UtcNow.AddHours(1),
-                credentials);
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
         }

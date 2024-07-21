@@ -10,6 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using static Infrastructure.Services.AutenticacionService;
 using Infrastructure.Services;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +36,47 @@ builder.Services.Configure<AutenticacionServiceOptions>(
     builder.Configuration.GetSection(AutenticacionServiceOptions.AutenticacionService));
 builder.Services.AddScoped<ICustomAuthenticationService, AutenticacionService>();
 
-// Configure Swagger
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(setupAction =>
+{
+    setupAction.AddSecurityDefinition("ConsultaAlumnosApiBearerAuth", new OpenApiSecurityScheme()
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        Description = "Acá pegar el token generado al loguearse."
+    });
+
+    setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ConsultaAlumnosApiBearerAuth" } 
+                }, new List<string>() }
+    });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    //setupAction.IncludeXmlComments(xmlPath);
+
+});
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options => 
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["AutenticacionService:Issuer"],
+            ValidAudience = builder.Configuration["AutenticacionService:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["AutenticacionService:SecretForKey"]))
+        };
+    }
+);
 
 var app = builder.Build();
 

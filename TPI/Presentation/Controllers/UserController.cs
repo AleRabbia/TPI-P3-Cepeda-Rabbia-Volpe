@@ -2,13 +2,16 @@
 using Application.Models;
 using Domain.Entities;
 using Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -61,11 +64,24 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "UserOrAdmin")]
         public async Task<ActionResult> Update(int id, UpdateUserDto userDto)
         {
             if (!Enum.TryParse(userDto.Role, out UserRole role))
             {
                 return BadRequest("Rol ingresado no es correcto.");
+            }
+
+            var existingUser = await _userService.GetUserByIdAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound("Usuario no encontrado.");
+            }
+
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            if (!User.IsInRole("Admin") && currentUserId != id)
+            {
+                return Forbid("No tienes permiso para actualizar este usuario.");
             }
 
             var user = new User
@@ -82,6 +98,7 @@ namespace Presentation.Controllers
             await _userService.UpdateUserAsync(user);
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)

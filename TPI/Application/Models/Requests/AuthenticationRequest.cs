@@ -12,8 +12,12 @@ namespace Application.Models.Requests
     {
         [Required]
         public string? UserName { get; set; }
+
         [Required]
         public string? Password { get; set; }
-        public UserRole? UserType { get; set; }
+
+        [Required]
+        [RegularExpression("^(Visitor|Customer|Admin)$", ErrorMessage = "UserType must be 'Visitor', 'Customer', or 'Admin'.")]
+        public string? UserType { get; set; }
     }
 }
