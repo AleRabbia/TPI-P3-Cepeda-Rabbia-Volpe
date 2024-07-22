@@ -11,6 +11,7 @@ namespace Application.Interfaces
     {
         Task AddUserAsync(User user);
         Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<User> GetUserByNameAsync(string name);
         Task<User> GetUserByIdAsync(int id);
         Task UpdateUserAsync(User user);
         Task DeleteUserAsync(int id);

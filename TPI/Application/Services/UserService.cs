@@ -39,5 +39,11 @@ namespace Application.Services
         {
             await _userRepository.DeleteAsync(id);
         }
+
+        public async Task<User> GetUserByNameAsync(string name)
+        {
+            return await _userRepository.GetByNameAsync(name);
+        }
+
     }
 }

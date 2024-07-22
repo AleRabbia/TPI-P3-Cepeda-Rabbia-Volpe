@@ -16,78 +16,78 @@ using System.Security.Claims;
 
 namespace Infrastructure.Services
 {
-    public class AutenticacionService : ICustomAuthenticationService
+    public class AuthenticationService : ICustomAuthenticationService
     {
         private readonly IUserRepository _userRepository;
-        private readonly AutenticacionServiceOptions _options;
+        private readonly AuthenticationServiceOptions _options;
 
-        public AutenticacionService(IUserRepository userRepository, IOptions<AutenticacionServiceOptions> options)
+        public AuthenticationService(IUserRepository userRepository, IOptions<AuthenticationServiceOptions> options)
         {
             _userRepository = userRepository;
             _options = options.Value;
         }
-
-        private async Task<User?> ValidateUserAsync(AuthenticationRequest authenticationRequest)
+        private User? ValidateUser(AuthenticationRequest authenticationRequest)
         {
             if (string.IsNullOrEmpty(authenticationRequest.UserName) || string.IsNullOrEmpty(authenticationRequest.Password))
                 return null;
 
-            var user = await _userRepository.GetUserByUserNameAsync(authenticationRequest.UserName);
+            var user = _userRepository.GetByNameAsync(authenticationRequest.UserName);
 
-            if (user == null)
-                return null;
-
-            if (!Enum.TryParse<UserRole>(authenticationRequest.UserType, true, out var userRole))
-                return null;
-
-            if (user.Role != userRole || user.Password != authenticationRequest.Password)
-                return null;
-
-            return user;
-        }
-
-        public async Task<string> AutenticarAsync(AuthenticationRequest authenticationRequest)
-        {
-            var user = await ValidateUserAsync(authenticationRequest);
-
-            if (user == null)
+            if (user != null && user.Password == authenticationRequest.Password)
             {
-                throw new NotAllowedException("User authentication failed");
+                return user;
             }
 
-            var securityPassword = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_options.SecretForKey));
-            var credentials = new SigningCredentials(securityPassword, SecurityAlgorithms.HmacSha256);
-
-            var claimsForToken = new List<Claim>
-            {
-                new Claim("sub", user.Id.ToString()),
-                new Claim("given_name", user.Name),
-                new Claim("family_name", user.LastName),
-                new Claim("role", user.Role.ToString())
-            };
-
-            var jwtSecurityToken = new JwtSecurityToken(
-                _options.Issuer,
-                _options.Audience,
-                claimsForToken,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+            throw new UnauthorizedAccessException("Credenciales inválidas.");
         }
 
         public string Autenticar(AuthenticationRequest authenticationRequest)
         {
-            throw new NotImplementedException();
-        }
+            //Paso 1: Validamos las credenciales
+            var user = ValidateUser(authenticationRequest);
 
-        public class AutenticacionServiceOptions
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Invalid credentials");
+            }
+
+            //Paso 2: Crear el token
+            var securityPassword = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("thisisthesecretforgeneratingakey(mustbeatleast32bitlong)")); //Traemos la SecretKey del Json. agregar antes: using Microsoft.IdentityModel.Tokens;
+            var credentials = new SigningCredentials(securityPassword, SecurityAlgorithms.HmacSha256);
+
+            var claimsForToken = new List<Claim>
         {
-            public const string AutenticacionService = "AutenticacionService";
+            new Claim("sub", user.Id.ToString()),
+                new Claim("given_name", user.Name),
+                new Claim("family_name", user.LastName),
+                new Claim("role", user.Role.ToString())
+        };
 
-            public string Issuer { get; set; }
-            public string Audience { get; set; }
-            public string SecretForKey { get; set; }
+            var jwtSecurityToken = new JwtSecurityToken(
+                _options.Issuer 
+                , _options.Audience
+                , claimsForToken 
+                , DateTime.UtcNow 
+                , DateTime.UtcNow.AddHours(1) 
+                , credentials
+                );
+
+            var tokenToReturn = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+            return tokenToReturn.ToString();
+
+
         }
+
+        public class AuthenticationServiceOptions
+        {
+            public const string AuthenticationService = "AuthenticationService";
+
+            public string? Issuer { get; set; }
+            public string? Audience { get; set; }
+            public string? SecretForKey { get; set; }
+        }
+
     }
+
 }
