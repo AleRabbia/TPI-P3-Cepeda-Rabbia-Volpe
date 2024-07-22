@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using static Infrastructure.Services.AutenticacionService;
+using static Infrastructure.Services.AuthenticationService;
 using Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -32,9 +32,9 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.Configure<AutenticacionServiceOptions>(
-    builder.Configuration.GetSection(AutenticacionServiceOptions.AutenticacionService));
-builder.Services.AddScoped<ICustomAuthenticationService, AutenticacionService>();
+builder.Services.Configure<AuthenticationServiceOptions>(
+    builder.Configuration.GetSection(AuthenticationServiceOptions.AuthenticationService));
+builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>();
 
 builder.Services.AddSwaggerGen(setupAction =>
 {

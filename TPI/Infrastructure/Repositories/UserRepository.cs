@@ -50,9 +50,9 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<User> GetByNameAsync(string name)
+        public User GetByNameAsync(string name)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            return _context.Users.FirstOrDefault(u => u.Name == name);
         }
     }
 }
