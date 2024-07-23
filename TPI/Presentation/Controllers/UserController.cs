@@ -9,7 +9,6 @@ using System.Security.Claims;
 namespace Presentation.Controllers;
 
 [ApiController]
-[Authorize]
 [Route("api/user")]
 public class UserController : ControllerBase
 {
@@ -21,6 +20,8 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
+
     public ActionResult<ICollection<UserDto>> GetAll()
     {
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
@@ -35,6 +36,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     public ActionResult<UserDto> GetById(int id)
     {
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
@@ -56,11 +58,11 @@ public class UserController : ControllerBase
     [HttpPost]
     public ActionResult Create(CreateUserDto userDto)
     {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+        //int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
+        //var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
+        //if (userRole != nameof(UserRole.Admin))
+            //return Forbid();
 
         if (!Enum.TryParse(userDto.Role, out UserRole role))
         {
@@ -82,13 +84,15 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public ActionResult Update(int id, UpdateUserDto userDto)
     {
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
         var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-        if (userRole != nameof(UserRole.Admin) && userId != id)
+        if (userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer) && userId != id)
             return Forbid();
+
 
         if (!Enum.TryParse(userDto.Role, out UserRole role))
         {
@@ -113,13 +117,14 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public ActionResult Delete(int id)
     {
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
         var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
+        if(userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer))
+                return Forbid();
 
         var existingUser = _userService.GetUserById(id);
         if (existingUser == null)
