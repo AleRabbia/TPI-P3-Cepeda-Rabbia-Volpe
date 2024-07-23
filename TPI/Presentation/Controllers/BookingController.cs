@@ -6,125 +6,126 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 
-namespace Presentation.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-[Authorize]
-public class BookingController : ControllerBase
+namespace Presentation.Controllers
 {
-    private readonly IBookingService _bookingService;
-
-    public BookingController(IBookingService bookingService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BookingController : ControllerBase
     {
-        _bookingService = bookingService;
-    }
+        private readonly IBookingService _bookingService;
 
-    [HttpGet]
-    public ActionResult<IEnumerable<BookingDTO>> GetAll()
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        var bookings = _bookingService.GetAllBookings();
-        var bookingDTOs = new List<BookingDTO>();
-        foreach (var booking in bookings)
+        public BookingController(IBookingService bookingService)
         {
-            bookingDTOs.Add(new BookingDTO
+            _bookingService = bookingService;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public ActionResult<IEnumerable<BookingDTO>> GetAll()
+        {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (userRole != nameof(UserRole.Admin))
+                return Forbid();
+
+            var bookings = _bookingService.GetAllBookings();
+            var bookingDTOs = new List<BookingDTO>();
+            foreach (var booking in bookings)
+            {
+                bookingDTOs.Add(new BookingDTO
+                {
+                    Id = booking.Id,
+                    CustomerId = booking.CustomerId,
+                    RoomId = booking.RoomId,
+                    CheckinDate = booking.CheckinDate,
+                    CheckoutDate = booking.CheckoutDate
+                });
+            }
+            return Ok(bookingDTOs);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public ActionResult<BookingDTO> GetById(int id)
+        {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (userRole != nameof(UserRole.Admin))
+                return Forbid();
+
+            var booking = _bookingService.GetBookingById(id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+            var bookingDTO = new BookingDTO
             {
                 Id = booking.Id,
                 CustomerId = booking.CustomerId,
                 RoomId = booking.RoomId,
                 CheckinDate = booking.CheckinDate,
                 CheckoutDate = booking.CheckoutDate
-            });
+            };
+            return Ok(bookingDTO);
         }
-        return Ok(bookingDTOs);
-    }
 
-    [HttpGet("{id}")]
-    public ActionResult<BookingDTO> GetById(int id)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        var booking = _bookingService.GetBookingById(id);
-        if (booking == null)
+        [HttpPost]
+        [Authorize]
+        public ActionResult<BookingDTO> CreateBooking(BookingCreateDTO bookingCreateDTO)
         {
-            return NotFound();
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer))
+                return Forbid();
+
+            var booking = _bookingService.AddBooking(bookingCreateDTO);
+
+            var bookingDTO = new BookingDTO
+            {
+                Id = booking.Id,
+                CustomerId = booking.CustomerId,
+                RoomId = booking.RoomId,
+                CheckinDate = booking.CheckinDate,
+                CheckoutDate = booking.CheckoutDate
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = bookingDTO.Id }, bookingDTO);
         }
-        var bookingDTO = new BookingDTO
+
+        [HttpPut("{id}")]
+        [Authorize]
+        public ActionResult Update(int id, BookingUpdateDTO bookingUpdateDTO)
         {
-            Id = booking.Id,
-            CustomerId = booking.CustomerId,
-            RoomId = booking.RoomId,
-            CheckinDate = booking.CheckinDate,
-            CheckoutDate = booking.CheckoutDate
-        };
-        return Ok(bookingDTO);
-    }
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-    [HttpPost]
-    public ActionResult<BookingDTO> CreateBooking(BookingCreateDTO bookingCreateDTO)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer))
+                return Forbid();
 
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
+            try
+            {
+                _bookingService.UpdateBooking(id, bookingUpdateDTO);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-        var booking = _bookingService.AddBooking(bookingCreateDTO);
-
-        var bookingDTO = new BookingDTO
+        [HttpDelete("{id}")]
+        [Authorize]
+        public ActionResult Delete(int id)
         {
-            Id = booking.Id,
-            CustomerId = booking.CustomerId,
-            RoomId = booking.RoomId,
-            CheckinDate = booking.CheckinDate,
-            CheckoutDate = booking.CheckoutDate
-        };
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-        return CreatedAtAction(nameof(GetById), new { id = bookingDTO.Id }, bookingDTO);
-    }
+            if (userRole != nameof(UserRole.Admin) && userRole != nameof(UserRole.Customer))
+                return Forbid();
 
-    [HttpPut("{id}")]
-    public ActionResult Update(int id, BookingUpdateDTO bookingUpdateDTO)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        try
-        {
-            _bookingService.UpdateBooking(id, bookingUpdateDTO);
+            _bookingService.DeleteBooking(id);
             return NoContent();
         }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
-    [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        _bookingService.DeleteBooking(id);
-        return NoContent();
     }
 }

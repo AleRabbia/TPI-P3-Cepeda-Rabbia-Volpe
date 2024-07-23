@@ -9,145 +9,133 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Presentation.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-[Authorize]
-public class RoomController : ControllerBase
+namespace Presentation.Controllers
 {
-    private readonly IRoomService _roomService;
-
-    public RoomController(IRoomService roomService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class RoomController : ControllerBase
     {
-        _roomService = roomService;
-    }
+        private readonly IRoomService _roomService;
 
-    [HttpGet]
-    public ActionResult<IEnumerable<RoomDto>> GetAll()
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        var rooms = _roomService.GetAllRooms();
-
-        var roomDtos = rooms.Select(room => new RoomDto
+        public RoomController(IRoomService roomService)
         {
-            Id = room.Id,
-            Price = room.Price,
-            Score = room.Score,
-            Service = room.Service,
-            Category = room.Category.ToString(),
-            Occupation = room.Occupation
-        });
-
-        return Ok(roomDtos);
-    }
-
-    [HttpGet("{id}")]
-    public ActionResult<RoomDto> GetById(int id)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        var room = _roomService.GetRoomById(id);
-        if (room == null)
-        {
-            return NotFound();
+            _roomService = roomService;
         }
 
-        var roomDto = new RoomDto
+        [HttpGet]
+        public ActionResult<IEnumerable<RoomDto>> GetAll()
         {
-            Id = room.Id,
-            Price = room.Price,
-            Score = room.Score,
-            Service = room.Service,
-            Category = room.Category.ToString(),
-            Occupation = room.Occupation
-        };
+            var rooms = _roomService.GetAllRooms();
 
-        return Ok(roomDto);
-    }
+            var roomDtos = rooms.Select(room => new RoomDto
+            {
+                Id = room.Id,
+                Price = room.Price,
+                Score = room.Score,
+                Service = room.Service,
+                Category = room.Category.ToString(),
+                Occupation = room.Occupation
+            });
 
-    [HttpPost]
-    public ActionResult Create(CreateRoomDto roomDto)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
-        {
-            return BadRequest("Invalid category value.");
+            return Ok(roomDtos);
         }
 
-        var room = new Room
+        [HttpGet("{id}")]
+        public ActionResult<RoomDto> GetById(int id)
         {
-            Price = roomDto.Price,
-            Score = roomDto.Score,
-            Service = roomDto.Service,
-            Category = category,
-            Occupation = roomDto.Occupation
-        };
+            var room = _roomService.GetRoomById(id);
+            if (room == null)
+            {
+                return NotFound();
+            }
 
-        _roomService.AddRoom(room);
-        return CreatedAtAction(nameof(GetById), new { id = room.Id }, room);
-    }
+            var roomDto = new RoomDto
+            {
+                Id = room.Id,
+                Price = room.Price,
+                Score = room.Score,
+                Service = room.Service,
+                Category = room.Category.ToString(),
+                Occupation = room.Occupation
+            };
 
-    [HttpPut("{id}")]
-    public ActionResult Update(int id, UpdateRoomDto roomDto)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
-        {
-            return BadRequest("Invalid category value.");
+            return Ok(roomDto);
         }
 
-        var existingRoom = _roomService.GetRoomById(id);
-        if (existingRoom == null)
+        [HttpPost]
+        [Authorize]
+        public ActionResult Create(CreateRoomDto roomDto)
         {
-            return NotFound("Room not found.");
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (userRole != nameof(UserRole.Admin))
+                return Forbid();
+
+            if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
+            {
+                return BadRequest("Invalid category value.");
+            }
+
+            var room = new Room
+            {
+                Price = roomDto.Price,
+                Score = roomDto.Score,
+                Service = roomDto.Service,
+                Category = category,
+                Occupation = roomDto.Occupation
+            };
+
+            _roomService.AddRoom(room);
+            return CreatedAtAction(nameof(GetById), new { id = room.Id }, room);
         }
 
-        existingRoom.Price = roomDto.Price;
-        existingRoom.Score = roomDto.Score;
-        existingRoom.Service = roomDto.Service;
-        existingRoom.Category = category;
-        existingRoom.Occupation = roomDto.Occupation;
-
-        _roomService.UpdateRoom(existingRoom);
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
-    {
-        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
-        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-
-        if (userRole != nameof(UserRole.Admin))
-            return Forbid();
-
-        var existingRoom = _roomService.GetRoomById(id);
-        if (existingRoom == null)
+        [HttpPut("{id}")]
+        [Authorize]
+        public ActionResult Update(int id, UpdateRoomDto roomDto)
         {
-            return NotFound("Room not found.");
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (userRole != nameof(UserRole.Admin))
+                return Forbid();
+
+            if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
+            {
+                return BadRequest("Invalid category value.");
+            }
+
+            var existingRoom = _roomService.GetRoomById(id);
+            if (existingRoom == null)
+            {
+                return NotFound("Room not found.");
+            }
+
+            existingRoom.Price = roomDto.Price;
+            existingRoom.Score = roomDto.Score;
+            existingRoom.Service = roomDto.Service;
+            existingRoom.Category = category;
+            existingRoom.Occupation = roomDto.Occupation;
+
+            _roomService.UpdateRoom(existingRoom);
+            return NoContent();
         }
 
-        _roomService.DeleteRoom(id);
-        return NoContent();
+        [HttpDelete("{id}")]
+        [Authorize]
+        public ActionResult Delete(int id)
+        {
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+            if (userRole != nameof(UserRole.Admin))
+                return Forbid();
+
+            var existingRoom = _roomService.GetRoomById(id);
+            if (existingRoom == null)
+            {
+                return NotFound("Room not found.");
+            }
+
+            _roomService.DeleteRoom(id);
+            return NoContent();
+        }
     }
 }
