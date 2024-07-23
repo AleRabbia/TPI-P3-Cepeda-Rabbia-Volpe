@@ -1,15 +1,14 @@
 ﻿using Domain.Entities;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
     public interface IRoomRepository
     {
-        Task<IEnumerable<Room>> GetAllAsync();
-        Task<Room> GetByIdAsync(int id);
-        Task AddAsync(Room room);
-        Task UpdateAsync(Room room);
-        Task DeleteAsync(int id);
+        IEnumerable<Room> GetAll();
+        Room GetById(int id);
+        void Add(Room room);
+        void Update(Room room);
+        void Delete(int id);
     }
 }

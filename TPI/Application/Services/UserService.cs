@@ -2,7 +2,6 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -15,35 +14,34 @@ namespace Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task AddUserAsync(User user)
+        public void AddUser(User user)
         {
-            await _userRepository.AddAsync(user);
+            _userRepository.Add(user);
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public IEnumerable<User> GetAllUsers()
         {
-            return await _userRepository.GetAllAsync();
+            return _userRepository.GetAll();
         }
 
-        public async Task<User> GetUserByIdAsync(int id)
+        public User GetUserById(int id)
         {
-            return await _userRepository.GetByIdAsync(id);
+            return _userRepository.GetById(id);
         }
 
-        public async Task UpdateUserAsync(User user)
+        public void UpdateUser(User user)
         {
-            await _userRepository.UpdateAsync(user);
+            _userRepository.Update(user);
         }
 
-        public async Task DeleteUserAsync(int id)
+        public void DeleteUser(int id)
         {
-            await _userRepository.DeleteAsync(id);
+            _userRepository.Delete(id);
         }
 
-        public User GetUserByNameAsync(string name)
+        public User GetUserByName(string name)
         {
-            return _userRepository.GetByNameAsync(name);
+            return _userRepository.GetByName(name);
         }
-
     }
 }

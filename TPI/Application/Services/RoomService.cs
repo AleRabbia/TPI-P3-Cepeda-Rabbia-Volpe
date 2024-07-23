@@ -3,9 +3,6 @@ using Domain.Entities;
 using Domain.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -18,29 +15,29 @@ namespace Application.Services
             _roomRepository = roomRepository;
         }
 
-        public async Task<IEnumerable<Room>> GetAllRoomsAsync()
+        public IEnumerable<Room> GetAllRooms()
         {
-            return await _roomRepository.GetAllAsync();
+            return _roomRepository.GetAll();
         }
 
-        public async Task<Room> GetRoomByIdAsync(int id)
+        public Room GetRoomById(int id)
         {
-            return await _roomRepository.GetByIdAsync(id);
+            return _roomRepository.GetById(id);
         }
 
-        public async Task AddRoomAsync(Room room)
+        public void AddRoom(Room room)
         {
-            await _roomRepository.AddAsync(room);
+            _roomRepository.Add(room);
         }
 
-        public async Task UpdateRoomAsync(Room room)
+        public void UpdateRoom(Room room)
         {
-            await _roomRepository.UpdateAsync(room);
+            _roomRepository.Update(room);
         }
 
-        public async Task DeleteRoomAsync(int id)
+        public void DeleteRoom(int id)
         {
-            await _roomRepository.DeleteAsync(id);
+            _roomRepository.Delete(id);
         }
     }
 }

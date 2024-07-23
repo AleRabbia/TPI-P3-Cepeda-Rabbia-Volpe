@@ -5,7 +5,6 @@ using Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -22,27 +21,27 @@ namespace Application.Services
             _roomRepository = roomRepository;
         }
 
-        public async Task<IEnumerable<Booking>> GetAllBookingsAsync()
+        public IEnumerable<Booking> GetAllBookings()
         {
-            return await _bookingRepository.GetAllAsync();
+            return _bookingRepository.GetAll();
         }
 
-        public async Task<Booking> GetBookingByIdAsync(int id)
+        public Booking GetBookingById(int id)
         {
-            return await _bookingRepository.GetByIdAsync(id);
+            return _bookingRepository.GetById(id);
         }
 
-        public async Task<Booking> AddBookingAsync(BookingCreateDTO bookingCreateDTO)
+        public Booking AddBooking(BookingCreateDTO bookingCreateDTO)
         {
-            var user = await _userRepository.GetByIdAsync(bookingCreateDTO.CustomerId);
+            var user = _userRepository.GetById(bookingCreateDTO.CustomerId);
             if (user == null)
                 throw new Exception("User not found");
 
-            var room = await _roomRepository.GetByIdAsync(bookingCreateDTO.RoomId);
+            var room = _roomRepository.GetById(bookingCreateDTO.RoomId);
             if (room == null)
                 throw new Exception("Room not found");
 
-            var bookings = await _bookingRepository.GetAllAsync();
+            var bookings = _bookingRepository.GetAll();
             if (bookings.Any(b => b.RoomId == bookingCreateDTO.RoomId &&
                                   b.CheckinDate < bookingCreateDTO.CheckoutDate &&
                                   b.CheckoutDate > bookingCreateDTO.CheckinDate))
@@ -58,21 +57,21 @@ namespace Application.Services
                 CheckoutDate = bookingCreateDTO.CheckoutDate
             };
 
-            await _bookingRepository.AddAsync(booking);
+            _bookingRepository.Add(booking);
             return booking;
         }
 
-        public async Task UpdateBookingAsync(int id, BookingUpdateDTO bookingUpdateDTO)
+        public void UpdateBooking(int id, BookingUpdateDTO bookingUpdateDTO)
         {
-            var booking = await _bookingRepository.GetByIdAsync(id);
+            var booking = _bookingRepository.GetById(id);
             if (booking == null)
                 throw new Exception("Booking not found");
 
-            var room = await _roomRepository.GetByIdAsync(bookingUpdateDTO.RoomId);
+            var room = _roomRepository.GetById(bookingUpdateDTO.RoomId);
             if (room == null)
                 throw new Exception("Room not found");
 
-            var bookings = await _bookingRepository.GetAllAsync();
+            var bookings = _bookingRepository.GetAll();
             if (bookings.Any(b => b.RoomId == bookingUpdateDTO.RoomId &&
                                   b.Id != id &&
                                   b.CheckinDate < bookingUpdateDTO.CheckoutDate &&
@@ -85,12 +84,12 @@ namespace Application.Services
             booking.CheckinDate = bookingUpdateDTO.CheckinDate;
             booking.CheckoutDate = bookingUpdateDTO.CheckoutDate;
 
-            await _bookingRepository.UpdateAsync(booking);
+            _bookingRepository.Update(booking);
         }
 
-        public async Task DeleteBookingAsync(int id)
+        public void DeleteBooking(int id)
         {
-            await _bookingRepository.DeleteAsync(id);
+            _bookingRepository.Delete(id);
         }
     }
 }

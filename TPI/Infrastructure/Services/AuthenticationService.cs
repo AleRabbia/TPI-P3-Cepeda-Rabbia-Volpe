@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Application.Interfaces;
 using Application.Models.Requests;
 using Domain.Interfaces;
@@ -31,7 +30,7 @@ namespace Infrastructure.Services
             if (string.IsNullOrEmpty(authenticationRequest.UserName) || string.IsNullOrEmpty(authenticationRequest.Password))
                 return null;
 
-            var user = _userRepository.GetByNameAsync(authenticationRequest.UserName);
+            var user = _userRepository.GetByName(authenticationRequest.UserName);
 
             if (user != null && user.Password == authenticationRequest.Password)
             {

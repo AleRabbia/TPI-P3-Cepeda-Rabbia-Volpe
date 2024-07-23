@@ -5,6 +5,8 @@ using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 
 namespace Presentation.Controllers
@@ -22,17 +24,17 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
+        public ActionResult<IEnumerable<UserDto>> GetAll()
         {
-            var users = await _userService.GetAllUsersAsync();
+            var users = _userService.GetAllUsers();
             var userDtos = users.Select(user => UserDto.Create(user));
             return Ok(userDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetById(int id)
+        public ActionResult<UserDto> GetById(int id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var user = _userService.GetUserById(id);
             if (user == null)
             {
                 return NotFound();
@@ -42,11 +44,11 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(CreateUserDto userDto)
+        public ActionResult Create(CreateUserDto userDto)
         {
             if (!Enum.TryParse(userDto.Role, out UserRole role))
             {
-                return BadRequest("Rol ingresado no es correcto.");
+                return BadRequest("Invalid role.");
             }
 
             var user = new User
@@ -59,29 +61,29 @@ namespace Presentation.Controllers
                 Role = role
             };
 
-            await _userService.AddUserAsync(user);
+            _userService.AddUser(user);
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserDto.Create(user));
         }
 
         [HttpPut("{id}")]
         [Authorize(Policy = "UserOrAdmin")]
-        public async Task<ActionResult> Update(int id, UpdateUserDto userDto)
+        public ActionResult Update(int id, UpdateUserDto userDto)
         {
             if (!Enum.TryParse(userDto.Role, out UserRole role))
             {
-                return BadRequest("Rol ingresado no es correcto.");
+                return BadRequest("Invalid role.");
             }
 
-            var existingUser = await _userService.GetUserByIdAsync(id);
+            var existingUser = _userService.GetUserById(id);
             if (existingUser == null)
             {
-                return NotFound("Usuario no encontrado.");
+                return NotFound("User not found.");
             }
 
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             if (!User.IsInRole("Admin") && currentUserId != id)
             {
-                return Forbid("No tienes permiso para actualizar este usuario.");
+                return Forbid("You do not have permission to update this user.");
             }
 
             var user = new User
@@ -95,15 +97,14 @@ namespace Presentation.Controllers
                 Role = role
             };
 
-            await _userService.UpdateUserAsync(user);
+            _userService.UpdateUser(user);
             return NoContent();
         }
 
-
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public ActionResult Delete(int id)
         {
-            await _userService.DeleteUserAsync(id);
+            _userService.DeleteUser(id);
             return NoContent();
         }
     }

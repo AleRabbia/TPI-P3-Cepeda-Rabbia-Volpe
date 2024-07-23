@@ -1,11 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
@@ -18,35 +15,35 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Room>> GetAllAsync()
+        public IEnumerable<Room> GetAll()
         {
-            return await _context.Rooms.ToListAsync();
+            return _context.Rooms.ToList();
         }
 
-        public async Task<Room> GetByIdAsync(int id)
+        public Room GetById(int id)
         {
-            return await _context.Rooms.FindAsync(id);
+            return _context.Rooms.Find(id);
         }
 
-        public async Task AddAsync(Room room)
+        public void Add(Room room)
         {
-            await _context.Rooms.AddAsync(room);
-            await _context.SaveChangesAsync();
+            _context.Rooms.Add(room);
+            _context.SaveChanges();
         }
 
-        public async Task UpdateAsync(Room room)
+        public void Update(Room room)
         {
             _context.Rooms.Update(room);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task DeleteAsync(int id)
+        public void Delete(int id)
         {
-            var room = await _context.Rooms.FindAsync(id);
+            var room = _context.Rooms.Find(id);
             if (room != null)
             {
                 _context.Rooms.Remove(room);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
     }

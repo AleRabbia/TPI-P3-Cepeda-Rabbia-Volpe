@@ -38,7 +38,7 @@ builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>(
 
 builder.Services.AddSwaggerGen(setupAction =>
 {
-    setupAction.AddSecurityDefinition("ConsultaAlumnosApiBearerAuth", new OpenApiSecurityScheme()
+    setupAction.AddSecurityDefinition("TPIApiBearerAuth", new OpenApiSecurityScheme()
     {
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
@@ -53,7 +53,7 @@ builder.Services.AddSwaggerGen(setupAction =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "ConsultaAlumnosApiBearerAuth" } 
+                    Id = "TPIApiBearerAuth" } 
                 }, new List<string>() }
     });
 

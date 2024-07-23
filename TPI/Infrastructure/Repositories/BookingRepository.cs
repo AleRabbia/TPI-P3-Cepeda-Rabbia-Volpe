@@ -1,11 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
@@ -18,35 +15,35 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Booking>> GetAllAsync()
+        public IEnumerable<Booking> GetAll()
         {
-            return await _context.Bookings.ToListAsync();
+            return _context.Bookings.ToList();
         }
 
-        public async Task<Booking> GetByIdAsync(int id)
+        public Booking GetById(int id)
         {
-            return await _context.Bookings.FindAsync(id);
+            return _context.Bookings.Find(id);
         }
 
-        public async Task AddAsync(Booking booking)
+        public void Add(Booking booking)
         {
-            await _context.Bookings.AddAsync(booking);
-            await _context.SaveChangesAsync();
+            _context.Bookings.Add(booking);
+            _context.SaveChanges();
         }
 
-        public async Task UpdateAsync(Booking booking)
+        public void Update(Booking booking)
         {
             _context.Bookings.Update(booking);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task DeleteAsync(int id)
+        public void Delete(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
+            var booking = _context.Bookings.Find(id);
             if (booking != null)
             {
                 _context.Bookings.Remove(booking);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
     }

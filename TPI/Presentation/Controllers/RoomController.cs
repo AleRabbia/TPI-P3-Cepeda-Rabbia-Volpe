@@ -4,6 +4,8 @@ using Domain.Entities;
 using Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Presentation.Controllers
 {
@@ -19,9 +21,9 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomDto>>> GetAll()
+        public ActionResult<IEnumerable<RoomDto>> GetAll()
         {
-            var rooms = await _roomService.GetAllRoomsAsync();
+            var rooms = _roomService.GetAllRooms();
 
             var roomDtos = rooms.Select(room => new RoomDto
             {
@@ -29,7 +31,7 @@ namespace Presentation.Controllers
                 Price = room.Price,
                 Score = room.Score,
                 Service = room.Service,
-                Category = room.Category.ToString(), // Convierte el enum a string
+                Category = room.Category.ToString(), // Convert enum to string
                 Occupation = room.Occupation
             });
 
@@ -37,9 +39,9 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RoomDto>> GetById(int id)
+        public ActionResult<RoomDto> GetById(int id)
         {
-            var room = await _roomService.GetRoomByIdAsync(id);
+            var room = _roomService.GetRoomById(id);
             if (room == null)
             {
                 return NotFound();
@@ -51,20 +53,19 @@ namespace Presentation.Controllers
                 Price = room.Price,
                 Score = room.Score,
                 Service = room.Service,
-                Category = room.Category.ToString(), // Convierte el enum a string
+                Category = room.Category.ToString(), // Convert enum to string
                 Occupation = room.Occupation
             };
 
             return Ok(roomDto);
         }
 
-
         [HttpPost]
-        public async Task<ActionResult> Create(CreateRoomDto roomDto)
+        public ActionResult Create(CreateRoomDto roomDto)
         {
             if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
             {
-                return BadRequest("Valor de categoria no es correcto.");
+                return BadRequest("Invalid category value.");
             }
 
             var room = new Room
@@ -76,39 +77,36 @@ namespace Presentation.Controllers
                 Occupation = roomDto.Occupation
             };
 
-            await _roomService.AddRoomAsync(room);
+            _roomService.AddRoom(room);
             return CreatedAtAction(nameof(GetById), new { id = room.Id }, room);
         }
 
-
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, UpdateRoomDto roomDto)
+        public ActionResult Update(int id, UpdateRoomDto roomDto)
         {
-            // Convierte la string de Category a enum CategoryRoom
             if (!Enum.TryParse(roomDto.Category, out CategoryRoom category))
             {
-                return BadRequest("Valor de categoria no es correcto.");
+                return BadRequest("Invalid category value.");
             }
 
             var room = new Room
             {
-                Id = id, // Asegúrate de que el ID esté establecido correctamente
+                Id = id, // Ensure ID is set correctly
                 Price = roomDto.Price,
                 Score = roomDto.Score,
                 Service = roomDto.Service,
-                Category = category, // Asigna el valor del enum convertido
+                Category = category,
                 Occupation = roomDto.Occupation
             };
 
-            await _roomService.UpdateRoomAsync(room);
+            _roomService.UpdateRoom(room);
             return NoContent();
         }
 
-
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public ActionResult Delete(int id)
         {
-            await _roomService.DeleteRoomAsync(id);
+            _roomService.DeleteRoom(id);
             return NoContent();
         }
     }

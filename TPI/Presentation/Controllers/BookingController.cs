@@ -3,7 +3,7 @@ using Application.Models;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace Presentation.Controllers
 {
@@ -19,9 +19,9 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookingDTO>>> GetAll()
+        public ActionResult<IEnumerable<BookingDTO>> GetAll()
         {
-            var bookings = await _bookingService.GetAllBookingsAsync();
+            var bookings = _bookingService.GetAllBookings();
             var bookingDTOs = new List<BookingDTO>();
             foreach (var booking in bookings)
             {
@@ -38,9 +38,9 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookingDTO>> GetById(int id)
+        public ActionResult<BookingDTO> GetById(int id)
         {
-            var booking = await _bookingService.GetBookingByIdAsync(id);
+            var booking = _bookingService.GetBookingById(id);
             if (booking == null)
             {
                 return NotFound();
@@ -57,9 +57,9 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<BookingDTO>> CreateBooking(BookingCreateDTO bookingCreateDTO)
+        public ActionResult<BookingDTO> CreateBooking(BookingCreateDTO bookingCreateDTO)
         {
-            var booking = await _bookingService.AddBookingAsync(bookingCreateDTO);
+            var booking = _bookingService.AddBooking(bookingCreateDTO);
 
             var bookingDTO = new BookingDTO
             {
@@ -74,11 +74,11 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, BookingUpdateDTO bookingUpdateDTO)
+        public ActionResult Update(int id, BookingUpdateDTO bookingUpdateDTO)
         {
             try
             {
-                await _bookingService.UpdateBookingAsync(id, bookingUpdateDTO);
+                _bookingService.UpdateBooking(id, bookingUpdateDTO);
                 return NoContent();
             }
             catch (Exception ex)
@@ -88,9 +88,9 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public ActionResult Delete(int id)
         {
-            await _bookingService.DeleteBookingAsync(id);
+            _bookingService.DeleteBooking(id);
             return NoContent();
         }
     }
