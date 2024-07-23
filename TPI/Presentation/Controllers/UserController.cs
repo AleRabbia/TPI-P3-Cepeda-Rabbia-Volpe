@@ -3,109 +3,131 @@ using Application.Models;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 
-namespace Presentation.Controllers
+namespace Presentation.Controllers;
+
+[ApiController]
+[Authorize]
+[Route("api/user")]
+public class UserController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class UserController : ControllerBase
+    private readonly IUserService _userService;
+
+    public UserController(IUserService userService)
     {
-        private readonly IUserService _userService;
+        _userService = userService;
+    }
 
-        public UserController(IUserService userService)
+    [HttpGet]
+    public ActionResult<ICollection<UserDto>> GetAll()
+    {
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (userRole != nameof(UserRole.Admin))
+            return Forbid();
+
+        var users = _userService.GetAllUsers();
+        var userDtos = users.Select(user => UserDto.Create(user)).ToList();
+        return Ok(userDtos);
+    }
+
+    [HttpGet("{id}")]
+    public ActionResult<UserDto> GetById(int id)
+    {
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (userRole != nameof(UserRole.Admin) && userId != id)
+            return Forbid();
+
+        var user = _userService.GetUserById(id);
+        if (user == null)
         {
-            _userService = userService;
+            return NotFound();
         }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<UserDto>> GetAll()
+        var userDto = UserDto.Create(user);
+        return Ok(userDto);
+    }
+
+    [HttpPost]
+    public ActionResult Create(CreateUserDto userDto)
+    {
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (userRole != nameof(UserRole.Admin))
+            return Forbid();
+
+        if (!Enum.TryParse(userDto.Role, out UserRole role))
         {
-            var users = _userService.GetAllUsers();
-            var userDtos = users.Select(user => UserDto.Create(user));
-            return Ok(userDtos);
+            return BadRequest("Invalid role.");
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<UserDto> GetById(int id)
+        var user = new User
         {
-            var user = _userService.GetUserById(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            var userDto = UserDto.Create(user);
-            return Ok(userDto);
+            Name = userDto.Name,
+            LastName = userDto.LastName,
+            Email = userDto.Email,
+            Password = userDto.Password,
+            Birthdate = userDto.Birthdate,
+            Role = role
+        };
+
+        _userService.AddUser(user);
+        return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserDto.Create(user));
+    }
+
+    [HttpPut("{id}")]
+    public ActionResult Update(int id, UpdateUserDto userDto)
+    {
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (userRole != nameof(UserRole.Admin) && userId != id)
+            return Forbid();
+
+        if (!Enum.TryParse(userDto.Role, out UserRole role))
+        {
+            return BadRequest("Invalid role.");
         }
 
-        [HttpPost]
-        public ActionResult Create(CreateUserDto userDto)
+        var existingUser = _userService.GetUserById(id);
+        if (existingUser == null)
         {
-            if (!Enum.TryParse(userDto.Role, out UserRole role))
-            {
-                return BadRequest("Invalid role.");
-            }
-
-            var user = new User
-            {
-                Name = userDto.Name,
-                LastName = userDto.LastName,
-                Email = userDto.Email,
-                Password = userDto.Password,
-                Birthdate = userDto.Birthdate,
-                Role = role
-            };
-
-            _userService.AddUser(user);
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, UserDto.Create(user));
+            return NotFound("User not found.");
         }
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "UserOrAdmin")]
-        public ActionResult Update(int id, UpdateUserDto userDto)
+        existingUser.Name = userDto.Name;
+        existingUser.LastName = userDto.LastName;
+        existingUser.Email = userDto.Email;
+        existingUser.Password = userDto.Password;
+        existingUser.Birthdate = userDto.Birthdate;
+        existingUser.Role = role;
+
+        _userService.UpdateUser(existingUser);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public ActionResult Delete(int id)
+    {
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? "");
+        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+        if (userRole != nameof(UserRole.Admin))
+            return Forbid();
+
+        var existingUser = _userService.GetUserById(id);
+        if (existingUser == null)
         {
-            if (!Enum.TryParse(userDto.Role, out UserRole role))
-            {
-                return BadRequest("Invalid role.");
-            }
-
-            var existingUser = _userService.GetUserById(id);
-            if (existingUser == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            if (!User.IsInRole("Admin") && currentUserId != id)
-            {
-                return Forbid("You do not have permission to update this user.");
-            }
-
-            var user = new User
-            {
-                Id = id,
-                Name = userDto.Name,
-                LastName = userDto.LastName,
-                Email = userDto.Email,
-                Password = userDto.Password,
-                Birthdate = userDto.Birthdate,
-                Role = role
-            };
-
-            _userService.UpdateUser(user);
-            return NoContent();
+            return NotFound("User not found.");
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
-        {
-            _userService.DeleteUser(id);
-            return NoContent();
-        }
+        _userService.DeleteUser(id);
+        return NoContent();
     }
 }
