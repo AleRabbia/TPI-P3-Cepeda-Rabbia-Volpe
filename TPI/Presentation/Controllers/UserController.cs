@@ -74,7 +74,7 @@ public class UserController : ControllerBase
             Email = userDto.Email,
             Password = userDto.Password,
             Birthdate = userDto.Birthdate,
-            Role = role
+            Role = userDto.Role
         };
 
         _userService.AddUser(user);
@@ -106,7 +106,7 @@ public class UserController : ControllerBase
         existingUser.Email = userDto.Email;
         existingUser.Password = userDto.Password;
         existingUser.Birthdate = userDto.Birthdate;
-        existingUser.Role = role;
+        existingUser.Role = userDto.Role;
 
         _userService.UpdateUser(existingUser);
         return NoContent();

@@ -24,7 +24,7 @@ namespace Application.Models
                 LastName = user.LastName,
                 Email = user.Email,
                 Birthdate = user.Birthdate,
-                Role = user.Role.ToString()
+                Role = user.Role
             };
         }
     }
